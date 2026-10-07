@@ -4,7 +4,8 @@
 #
 #   curl -fsSL https://raw.githubusercontent.com/MrM11235dev/workspace-create/main/install.sh | sh
 #
-# Installs two commands: workspace-create and aes_crypt.
+# Installs five commands: workspace-create, aes_crypt, venv_activate,
+# custom_dbt_run and linting_dbt_models.
 #
 # Always installs to ~/.local/bin, creating it when missing. Nothing is written
 # outside your home directory, so no sudo and no system directories.
@@ -14,7 +15,8 @@
 #   BRANCH       branch or tag to install   (default: main)
 #   HOST         github | gitlab            (default: github)
 #   BINS         space-separated commands to install
-#                (default: workspace-create aes_crypt)
+#                (default: workspace-create aes_crypt venv_activate
+#                 custom_dbt_run linting_dbt_models)
 #   BASE_URL     raw base URL of the repo at BRANCH, bypassing HOST/REPO/BRANCH
 #                (for self-hosted GitLab and the like). Each command is fetched
 #                from $BASE_URL/bin/<name>.
@@ -25,7 +27,7 @@ REPO="${REPO:-MrM11235dev/workspace-create}"
 # -----------------------------------------------------------------------------
 BRANCH="${BRANCH:-main}"
 HOST="${HOST:-github}"
-BINS="${BINS:-workspace-create aes_crypt}"
+BINS="${BINS:-workspace-create aes_crypt venv_activate custom_dbt_run linting_dbt_models}"
 
 if [ -z "${BASE_URL:-}" ]; then
 	case "$REPO" in

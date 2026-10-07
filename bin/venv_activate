@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+#
+# venv_activate — activate a Python virtualenv from /Volumes/manoj_ssd/Python_envs.
+#
+#   venv_activate myproject
+#
+# Activating a virtualenv changes the *current* shell, so this one is only
+# useful sourced — as a command it would activate inside a subshell that exits
+# immediately. Source it from ~/.zshrc or ~/.bashrc:
+#
+#   source ~/.local/bin/venv_activate
+#
+# Requires bash 3.2 or newer, or zsh.
+
+PROGRAM_NAME="venv_activate"
+VERSION="1.0.0"
+
+venv_activate() {
+    source "/Volumes/manoj_ssd/Python_envs/$1/bin/activate"
+}
+
+usage() {
+    cat <<EOF
+$PROGRAM_NAME $VERSION — activate a Python virtualenv by name
+
+Usage:
+  $PROGRAM_NAME ENV_NAME
+
+Activates /Volumes/manoj_ssd/Python_envs/ENV_NAME/bin/activate.
+
+This only works when sourced, because activation modifies the current shell:
+
+  echo 'source ~/.local/bin/$PROGRAM_NAME' >> ~/.zshrc && exec zsh
+
+Options:
+  -h, --help     Show this help.
+  -V, --version  Show the version.
+
+Examples:
+  $PROGRAM_NAME dbt
+  deactivate
+EOF
+}
+
+# Sourcing this file only defines the function. Running it dispatches.
+if [ -n "${BASH_SOURCE+x}" ] && [ "${BASH_SOURCE[0]}" = "$0" ]; then
+    case "${1:-}" in
+        -h|--help) usage ;;
+        -V|--version) printf '%s %s\n' "$PROGRAM_NAME" "$VERSION" ;;
+        '') usage >&2; exit 1 ;;
+        *)
+            printf '%s: run as a command, this activates a virtualenv in a subshell that exits straight away.\n' "$PROGRAM_NAME" >&2
+            printf '%s: source this file instead, then call it:\n\n' "$PROGRAM_NAME" >&2
+            printf '  source %s\n  %s %s\n' "$0" "$PROGRAM_NAME" "$1" >&2
+            exit 1
+            ;;
+    esac
+fi
