@@ -27,13 +27,17 @@ Created /Users/you/backend.code-workspace with 3 folder(s):
 
 A single bash script with no dependencies — it runs on the bash 3.2 that ships with macOS.
 
+The installer also sets up [`aes_crypt`](#aes_crypt), a small AES-256-CBC
+encrypt/decrypt helper for files and strings.
+
 ## Requirements
 
 | | |
 |---|---|
-| **Running the tool** | `bash` 3.2 or newer — the version preinstalled on macOS is enough. No `jq`, no `realpath`, no package manager. |
+| **Running the tools** | `bash` 3.2 or newer — the version preinstalled on macOS is enough. No `jq`, no `realpath`, no package manager. |
 | **Installing** | `curl`, plus a writable `$HOME`. |
 | **`--open`** | The `code` command on your `PATH` (VS Code → *Shell Command: Install 'code' command in PATH*). Without `code`, the tool falls back to `open -a "Visual Studio Code"`, which only exists on macOS. |
+| **`aes_crypt`** | `openssl`, preinstalled on macOS and on most Linux distributions. |
 
 Linux and WSL work too, with one caveat: the `--open` fallback has no platform check. On
 Linux without `code` on your `PATH`, the workspace file is still written, but the command
@@ -45,11 +49,19 @@ then fails with `open: command not found` and exits non-zero.
 curl -fsSL https://raw.githubusercontent.com/MrM11235dev/workspace-create/main/install.sh | sh
 ```
 
-The executable goes to `~/.local/bin`, which is created if it does not exist. Nothing is
-written outside your home directory — no `sudo`, no system directories. If `~/.local/bin`
-is not on your `PATH`, the installer prints a ready-to-paste command that appends the
-export to `~/.zshrc` and runs `exec zsh`. That line assumes zsh, the macOS default — on
-bash or fish, point it at your own rc file instead.
+That installs two commands, `workspace-create` and `aes_crypt`. Both go to `~/.local/bin`,
+which is created if it does not exist. Nothing is written outside your home directory — no
+`sudo`, no system directories. If `~/.local/bin` is not on your `PATH`, the installer
+prints a ready-to-paste command that appends the export to `~/.zshrc` and runs `exec zsh`.
+That line assumes zsh, the macOS default — on bash or fish, point it at your own rc file
+instead.
+
+To install only one of them, set `BINS`:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/MrM11235dev/workspace-create/main/install.sh |
+  BINS=workspace-create sh
+```
 
 Prefer to read before you run? Download `install.sh`, look at it, then `sh install.sh`.
 
@@ -58,32 +70,49 @@ Prefer to read before you run? Download `install.sh`, look at it, then `sh insta
 ```sh
 workspace-create --version      # workspace-create 1.0.0
 workspace-create --help
+
+aes_crypt --version             # aes_crypt 1.0.0
+aes_crypt --help
 ```
 
-The installer runs `--version` for you as its last step, so a successful install ends by
-printing the version.
+The installer runs `--version` on each installed command as its last step, so a successful
+install ends by printing both versions.
 
 ### Manual install
 
-No installer, three commands:
+No installer, one `curl` per command:
 
 ```sh
 mkdir -p ~/.local/bin
-curl -fsSL https://raw.githubusercontent.com/MrM11235dev/workspace-create/main/bin/workspace-create \
-  -o ~/.local/bin/workspace-create
-chmod +x ~/.local/bin/workspace-create
+for cmd in workspace-create aes_crypt; do
+  curl -fsSL "https://raw.githubusercontent.com/MrM11235dev/workspace-create/main/bin/$cmd" \
+    -o "$HOME/.local/bin/$cmd"
+  chmod +x "$HOME/.local/bin/$cmd"
+done
 ```
 
-Cloning works as well — the script is self-contained, so symlinking it onto your `PATH` is
-enough:
+Cloning works as well — both scripts are self-contained, so symlinking them onto your
+`PATH` is enough:
 
 ```sh
 mkdir -p ~/.local/bin
 git clone https://github.com/MrM11235dev/workspace-create.git ~/src/workspace-create
 ln -sf ~/src/workspace-create/bin/workspace-create ~/.local/bin/workspace-create
+ln -sf ~/src/workspace-create/bin/aes_crypt ~/.local/bin/aes_crypt
 ```
 
-`git pull` in the clone then updates the command. Moving the clone breaks the symlink.
+`git pull` in the clone then updates the commands. Moving the clone breaks the symlinks.
+
+### Use `aes_crypt` as a shell function
+
+`aes_crypt` is written so that sourcing it defines the function without running anything.
+If you would rather have it in every shell than on your `PATH`:
+
+```sh
+echo 'source ~/.local/bin/aes_crypt' >> ~/.zshrc && exec zsh
+```
+
+Running it as a command and sourcing it both work; pick one.
 
 ### Installer options
 
@@ -94,7 +123,8 @@ Set these as environment variables in front of `sh`:
 | `REPO` | `MrM11235dev/workspace-create` | `owner/repo` slug to install from — point it at your own fork. |
 | `BRANCH` | `main` | Branch or tag to install. |
 | `HOST` | `github` | `github` or `gitlab`. |
-| `SRC_URL` | *(derived)* | Full raw URL of `bin/workspace-create`, bypassing `HOST`/`REPO`/`BRANCH`. |
+| `BINS` | `workspace-create aes_crypt` | Space-separated commands to install. |
+| `BASE_URL` | *(derived)* | Raw base URL of the repo at `BRANCH`, bypassing `HOST`/`REPO`/`BRANCH`. Each command is fetched from `$BASE_URL/bin/<name>`. |
 
 Install a tagged release from a fork:
 
@@ -114,23 +144,25 @@ curl -fsSL https://gitlab.com/you/workspace-create/-/raw/main/install.sh |
 alone the installer keeps the default slug and tries to download it from GitLab, which
 404s.
 
-For a self-hosted GitLab, point `SRC_URL` straight at the raw file:
+For a self-hosted GitLab, point `BASE_URL` at the directory the `bin/` folder sits under:
 
 ```sh
 curl -fsSL https://git.example.com/you/workspace-create/-/raw/main/install.sh |
-  SRC_URL=https://git.example.com/you/workspace-create/-/raw/main/bin/workspace-create sh
+  BASE_URL=https://git.example.com/you/workspace-create/-/raw/main sh
 ```
 
 ### Update
 
-Re-run the install command. It overwrites `~/.local/bin/workspace-create` in place, via an
+Re-run the install command. It overwrites each command in `~/.local/bin` in place, via an
 atomic rename, so there is nothing to clean up first.
 
 ### Uninstall
 
 ```sh
-rm ~/.local/bin/workspace-create
+rm ~/.local/bin/workspace-create ~/.local/bin/aes_crypt
 ```
+
+If you added the `source ~/.local/bin/aes_crypt` line to your `~/.zshrc`, remove that too.
 
 ## Usage
 
@@ -239,6 +271,58 @@ file, or `-f` with a different name.
 `open -a "Visual Studio Code"` fallback failed — it is macOS-only, and even there it needs
 VS Code installed. The workspace file was still written; only the launch failed. Install
 the shell command from VS Code's command palette, or drop `-o` and open the file yourself.
+
+## aes_crypt
+
+AES-256-CBC encryption for a file or a string, wrapping `openssl enc` with PBKDF2 key
+derivation and a random salt.
+
+```sh
+aes_crypt {encrypt|decrypt} [-f <file>] [-t <text>] [-p <password>]
+```
+
+| Option | Purpose |
+|---|---|
+| `-f FILE` | Encrypt `FILE` to `FILE.enc`, or decrypt `FILE` to `FILE.dec`. |
+| `-t TEXT` | Encrypt or decrypt `TEXT`, base64, printed to stdout. |
+| `-p PASSWORD` | Password to use. Omit it and `openssl` prompts instead. |
+
+Strings:
+
+```sh
+$ aes_crypt encrypt -t "hello world"
+enter aes-256-cbc encryption password:
+U2FsdGVkX19X462I1FAUv71kWAXeP2YXLMt+b0cSTuE=
+
+$ aes_crypt decrypt -t "U2FsdGVkX19X462I1FAUv71kWAXeP2YXLMt+b0cSTuE="
+hello world
+```
+
+Files — the original is left alone, and the output is a new file alongside it:
+
+```sh
+$ aes_crypt encrypt -f notes.txt
+Encrypted file written to: notes.txt.enc
+
+$ aes_crypt decrypt -f notes.txt.enc
+Decrypted file written to: notes.txt.dec
+```
+
+Worth knowing:
+
+- **`-p` leaks the password.** It lands in your shell history and is visible in `ps` to
+  anyone else on the machine while `openssl` runs. Leave `-p` off for interactive use and
+  let `openssl` prompt; reach for it only in scripts, and ideally from a variable you
+  sourced from somewhere safer.
+- **A wrong password is not reported as a failure.** `openssl` prints `bad decrypt` to
+  stderr, but `aes_crypt` does not check its exit status: with `-f` it still prints
+  `Decrypted file written to: ...`, leaves a garbage `.dec` file behind, and exits `0`.
+  Read the stderr output rather than the exit code, and check the `.dec` file before
+  trusting it.
+- **Existing output files are overwritten** without asking.
+- **`-f` and `-t` together**: `-f` wins, `-t` is ignored.
+- **Round-tripping a file** gives you `notes.txt.dec`, not `notes.txt` — rename it
+  yourself if you want the original name back.
 
 ## License
 
