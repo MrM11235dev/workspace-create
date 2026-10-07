@@ -2,7 +2,7 @@
 #
 # Installer for workspace-create.
 #
-#   curl -fsSL https://raw.githubusercontent.com/smanoj2191/workspace-create/main/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/MrM11235dev/workspace-create/main/install.sh | sh
 #
 # Always installs to ~/.local/bin, creating it when missing. Nothing is written
 # outside your home directory, so no sudo and no system directories.
@@ -16,7 +16,7 @@
 
 set -eu
 
-REPO="${REPO:-smanoj2191/workspace-create}"
+REPO="${REPO:-MrM11235dev/workspace-create}"
 # -----------------------------------------------------------------------------
 BRANCH="${BRANCH:-main}"
 HOST="${HOST:-github}"

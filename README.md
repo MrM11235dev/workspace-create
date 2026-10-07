@@ -42,7 +42,7 @@ then fails with `open: command not found` and exits non-zero.
 ## Install
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/smanoj2191/workspace-create/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/MrM11235dev/workspace-create/main/install.sh | sh
 ```
 
 The executable goes to `~/.local/bin`, which is created if it does not exist. Nothing is
@@ -69,7 +69,7 @@ No installer, three commands:
 
 ```sh
 mkdir -p ~/.local/bin
-curl -fsSL https://raw.githubusercontent.com/smanoj2191/workspace-create/main/bin/workspace-create \
+curl -fsSL https://raw.githubusercontent.com/MrM11235dev/workspace-create/main/bin/workspace-create \
   -o ~/.local/bin/workspace-create
 chmod +x ~/.local/bin/workspace-create
 ```
@@ -79,7 +79,7 @@ enough:
 
 ```sh
 mkdir -p ~/.local/bin
-git clone https://github.com/smanoj2191/workspace-create.git ~/src/workspace-create
+git clone https://github.com/MrM11235dev/workspace-create.git ~/src/workspace-create
 ln -sf ~/src/workspace-create/bin/workspace-create ~/.local/bin/workspace-create
 ```
 
@@ -91,7 +91,7 @@ Set these as environment variables in front of `sh`:
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `REPO` | `smanoj2191/workspace-create` | `owner/repo` slug to install from — point it at your own fork. |
+| `REPO` | `MrM11235dev/workspace-create` | `owner/repo` slug to install from — point it at your own fork. |
 | `BRANCH` | `main` | Branch or tag to install. |
 | `HOST` | `github` | `github` or `gitlab`. |
 | `SRC_URL` | *(derived)* | Full raw URL of `bin/workspace-create`, bypassing `HOST`/`REPO`/`BRANCH`. |
@@ -99,7 +99,7 @@ Set these as environment variables in front of `sh`:
 Install a tagged release from a fork:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/smanoj2191/workspace-create/main/install.sh |
+curl -fsSL https://raw.githubusercontent.com/MrM11235dev/workspace-create/main/install.sh |
   REPO=you/workspace-create BRANCH=v1.0.0 sh
 ```
 
