@@ -2,13 +2,13 @@
 #
 # Installer for workspace-create.
 #
-#   curl -fsSL https://raw.githubusercontent.com/OWNER/workspace-create/main/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/smanoj2191/workspace-create/main/install.sh | sh
 #
 # Always installs to ~/.local/bin, creating it when missing. Nothing is written
 # outside your home directory, so no sudo and no system directories.
 #
 # Environment overrides:
-#   REPO         owner/repo slug            (default: the OWNER below)
+#   REPO         owner/repo slug            (default: the REPO set below)
 #   BRANCH       branch or tag to install   (default: main)
 #   HOST         github | gitlab            (default: github)
 #   SRC_URL      full URL of the script, bypassing HOST/REPO/BRANCH
@@ -16,8 +16,7 @@
 
 set -eu
 
-# ---- edit this one line after you create the repository ---------------------
-REPO="${REPO:-OWNER/workspace-create}"
+REPO="${REPO:-smanoj2191/workspace-create}"
 # -----------------------------------------------------------------------------
 BRANCH="${BRANCH:-main}"
 HOST="${HOST:-github}"
